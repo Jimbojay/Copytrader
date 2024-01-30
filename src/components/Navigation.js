@@ -3,8 +3,9 @@ import Navbar from 'react-bootstrap/Navbar';
 import Form from 'react-bootstrap/Form'
 import Button from 'react-bootstrap/Button'
 import Blockies from 'react-blockies'
+import '../CustomStyle.css';
 
-import logo from '../logo.png';
+import logo from '../DappAstra_logo.png';
 
 import { loadAccount, loadBalances } from '../store/interactions'
 
@@ -35,11 +36,11 @@ const Navigation = () => {
       <img
         alt="logo"
         src={logo}
-        width="40"
-        height="40"
+        width="200"
+        height="36"
         className="d-inline-block align-top mx-3"
       />
-      <Navbar.Brand href="#">Dapp University AMM</Navbar.Brand>
+      <Navbar.Brand href="#" className="white-navbar-brand">Copytrader</Navbar.Brand>
       <Navbar.Toggle aria-controls="nav" />
       <Navbar.Collapse id="nav" className="justify-content-end">
 

@@ -10,6 +10,9 @@ import Swap from './Swap';
 import Deposit from './Deposit';
 import Withdraw from './Withdraw';
 import Charts from './Charts';
+import ShadowTransactions from './ShadowTransactions';
+
+// import '../CustomStyle.css';
 
 import { 
   loadProvider,
@@ -65,6 +68,7 @@ function App() {
           <Route path="/deposit" element={<Deposit />} />
           <Route path="/withdraw" element={<Withdraw />} />
           <Route path="/charts" element={<Charts />} />
+          <Route path="/shadowTransactions" element={<ShadowTransactions />} />
         </Routes>
 
       </HashRouter>

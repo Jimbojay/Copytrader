@@ -17,6 +17,15 @@ const Tabs = () => {
       <LinkContainer to="/Charts">
         <Nav.Link>Charts</Nav.Link>
       </LinkContainer>
+      <LinkContainer to="/ShadowTransactions">
+        <Nav.Link>Shadow Transactions</Nav.Link>
+      </LinkContainer>
+      <LinkContainer to="/ShadowAddresses">
+        <Nav.Link>Shadow Addresses</Nav.Link>
+      </LinkContainer>
+      <LinkContainer to="/CopyTransactions">
+        <Nav.Link>P&L Copied transactions</Nav.Link>
+      </LinkContainer>
     </Nav>
   );
 }
