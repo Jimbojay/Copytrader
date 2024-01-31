@@ -5,9 +5,9 @@
 /*}*/
 
 /* custom.css */
-.white-navbar-brand {
+/*.white-navbar-brand {
     color: white !important;
-}
+}*/
 
 .blue-glow {
     box-shadow: 
@@ -16,6 +16,15 @@
 }
 
 
-.navbar .navbar-brand, .navbar .navbar-nav .nav-link  {
+/*.navbar .navbar-brand, .navbar .navbar-nav .nav-link  {
   color: white;
+}*/
+
+.disabled-input {
+  background-color: #f8f9fa; /* Grey background color */
+  color: #6c757d; /* Grey text color */
+  cursor: not-allowed; /* Change cursor style */
+  pointer-events: none; /* Disable pointer events */
 }
+
+/*Use bootstrap for styling 5.3 dark themes*/

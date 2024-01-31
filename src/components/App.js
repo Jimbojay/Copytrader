@@ -11,6 +11,7 @@ import Deposit from './Deposit';
 import Withdraw from './Withdraw';
 import Charts from './Charts';
 import ShadowTransactions from './ShadowTransactions';
+import ShadowAddressManager from './ShadowAddresses';
 
 // import '../CustomStyle.css';
 
@@ -69,6 +70,7 @@ function App() {
           <Route path="/withdraw" element={<Withdraw />} />
           <Route path="/charts" element={<Charts />} />
           <Route path="/shadowTransactions" element={<ShadowTransactions />} />
+          <Route path="/shadowAddressManager" element={<ShadowAddressManager />} />
         </Routes>
 
       </HashRouter>

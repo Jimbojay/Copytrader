@@ -10,7 +10,9 @@ const Tabs = () => {
       </LinkContainer>
       <LinkContainer to="/deposit">
         <Nav.Link>Deposit</Nav.Link>
-      </LinkContainer>
+      </LinkContainer>     
+      // {/*
+      // */}
       <LinkContainer to="/Withdraw">
         <Nav.Link>Withdraw</Nav.Link>
       </LinkContainer>
@@ -20,7 +22,7 @@ const Tabs = () => {
       <LinkContainer to="/ShadowTransactions">
         <Nav.Link>Shadow Transactions</Nav.Link>
       </LinkContainer>
-      <LinkContainer to="/ShadowAddresses">
+      <LinkContainer to="/ShadowAddressManager">
         <Nav.Link>Shadow Addresses</Nav.Link>
       </LinkContainer>
       <LinkContainer to="/CopyTransactions">

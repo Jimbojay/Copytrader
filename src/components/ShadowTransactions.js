@@ -3,7 +3,8 @@ import Table from 'react-bootstrap/Table';
 import Select from 'react-select';
 import Button from 'react-bootstrap/Button';
 
-// Helper function to convert time string to seconds
+import etherscanLogo from '../logo-etherscan.png';
+
 const timeToSeconds = (time) => {
   const [hours, minutes, seconds] = time.split('-').map(Number);
   return hours * 3600 + minutes * 60 + seconds;
@@ -16,31 +17,22 @@ const ShadowTransactions = () => {
     tokenTo: []
   });
 
-  const transactions = [
-    { alias: 'WarrenBuffet1', tokenFrom: 'ETH', tokenTo: 'BTC', amountFrom: '2.5', exchangeRate: '0.075', exchangeRateDifference: '3%', timeSinceSwap: '00-00-45', transactionHash: '0xabcdef1234567890000000000000000000000001' },
-    { alias: 'AlexBecker1', tokenFrom: 'USDC', tokenTo: 'ARB', amountFrom: '1000', exchangeRate: '0.95', exchangeRateDifference: '-2%', timeSinceSwap: '00-03-15', transactionHash: '0xabcdef1234567890000000000000000000000003' },
-    { alias: 'WarrenBuffet2', tokenFrom: 'SOL', tokenTo: 'USDT', amountFrom: '150', exchangeRate: '1.5', exchangeRateDifference: '1%', timeSinceSwap: '00-01-30', transactionHash: '0xabcdef1234567890000000000000000000000002' },
-    { alias: 'John1', tokenFrom: 'BTC', tokenTo: 'ETH', amountFrom: '0.8', exchangeRate: '13.5', exchangeRateDifference: '2.5%', timeSinceSwap: '00-10-00', transactionHash: '0xabcdef1234567890000000000000000000000004' },
-    { alias: 'John1', tokenFrom: 'USDT', tokenTo: 'SOL', amountFrom: '500', exchangeRate: '0.65', exchangeRateDifference: '0.5%', timeSinceSwap: '01-00-00', transactionHash: '0xabcdef1234567890000000000000000000000005' },
-  ];
+  const [transactions, setTransactions] = useState([
+    { alias: 'WarrenBuffet1', tokenFrom: 'ETH', tokenTo: 'BTC', amountFrom: '2.5', exchangeRate: '0.075', exchangeRateDifference: '3%', timeSinceSwap: '00-00-45', transactionHash: '0x7c028b92f82aa60314b87b9f2a1683f2026faf0b7b403588f3084c33db98b5c5 ', inputAmountFrom: '' },
+    { alias: 'AlexBecker1', tokenFrom: 'USDC', tokenTo: 'ARB', amountFrom: '1000', exchangeRate: '0.95', exchangeRateDifference: '-2%', timeSinceSwap: '00-03-15', transactionHash: '0xabcdef1234567890000000000000000000000003', inputAmountFrom: '' },
+    { alias: 'WarrenBuffet2', tokenFrom: 'SOL', tokenTo: 'USDT', amountFrom: '150', exchangeRate: '1.5', exchangeRateDifference: '1%', timeSinceSwap: '00-01-30', transactionHash: '0xabcdef1234567890000000000000000000000002', inputAmountFrom: '' },
+    { alias: 'John1', tokenFrom: 'BTC', tokenTo: 'ETH', amountFrom: '0.8', exchangeRate: '13.5', exchangeRateDifference: '2.5%', timeSinceSwap: '00-10-00', transactionHash: '0xabcdef1234567890000000000000000000000004', inputAmountFrom: '' },
+    { alias: 'John1', tokenFrom: 'USDT', tokenTo: 'SOL', amountFrom: '500', exchangeRate: '0.65', exchangeRateDifference: '0.5%', timeSinceSwap: '01-00-00', transactionHash: '0xabcdef1234567890000000000000000000000005', inputAmountFrom: '' },
+  ]);
 
-  // Function to format time from "dd-hh-mm" to "dd days, hh hours, mm minutes"
   const formatTimeSinceSwap = (time) => {
     const parts = time.split('-');
     return `${parts[0]} d, ${parts[1]} h, ${parts[2]} m`;
   };
 
-  // Sort transactions by timeSinceSwap in descending order
   const sortedTransactions = useMemo(() => {
     return transactions.slice().sort((a, b) => timeToSeconds(a.timeSinceSwap) - timeToSeconds(b.timeSinceSwap));
   }, [transactions]);
-
-
-  const filteredTransactions = sortedTransactions.filter((tx) =>
-    (filters.alias.length === 0 || filters.alias.some((alias) => alias.value === tx.alias)) &&
-    (filters.tokenFrom.length === 0 || filters.tokenFrom.some((token) => token.value === tx.tokenFrom)) &&
-    (filters.tokenTo.length === 0 || filters.tokenTo.some((token) => token.value === tx.tokenTo))
-  );
 
   const options = {
     alias: [...new Set(transactions.map((tx) => tx.alias))].map((alias) => ({ label: alias, value: alias })),
@@ -57,8 +49,7 @@ const ShadowTransactions = () => {
 
   const handleCopy = (text) => {
     navigator.clipboard.writeText(text).then(() => {
-      console.log('Copied to clipboard');
-      // Optional: Show some notification or change button state after copy
+      console.log(`Copied to clipboard: ${text}`);
     });
   };
 
@@ -99,14 +90,15 @@ const ShadowTransactions = () => {
             <th>Token to</th>
             <th>Amount from tokens</th>
             <th>Exchange rate</th>
-            <th>%Exchange rate difference since swap</th>
+            <th>%Difference vs. current exchange</th>
             <th>Time since swap</th>
+            <th>Swap amount</th>
             <th>Copy</th>
-            <th>Transaction hash</th>
+            <th>Etherscan</th>
           </tr>
         </thead>
         <tbody>
-          {filteredTransactions.map((transaction, index) => (
+          {transactions.map((transaction, index) => (
             <tr key={index}>
               <td>{transaction.alias}</td>
               <td>{transaction.tokenFrom}</td>
@@ -116,14 +108,38 @@ const ShadowTransactions = () => {
               <td>{transaction.exchangeRateDifference}</td>
               <td>{formatTimeSinceSwap(transaction.timeSinceSwap)}</td>
               <td>
+                <input
+                  type="number"
+                  placeholder="Input swap amount"
+                  value={transaction.inputAmountFrom}
+                  onChange={(e) => {
+                    const updatedTransactions = [...transactions];
+                    updatedTransactions[index].inputAmountFrom = e.target.value;
+                    setTransactions(updatedTransactions);
+                  }}
+                />
+              </td>
+              <td>
                 <Button 
                   variant="primary" 
-                  onClick={() => handleCopy(transaction.transactionHash)}
+                  onClick={() => handleCopy(transaction.inputAmountFrom)}
                 >
                   Copy
                 </Button>
               </td>
-              <td>{transaction.transactionHash}</td>
+              <td style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <a
+                  href={`https://etherscan.io/tx/${transaction.transactionHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <img
+                    src={etherscanLogo}
+                    alt="Etherscan Logo"
+                    style={{ width: '24px', height: '24px' }}
+                  />
+                </a>
+              </td>
             </tr>
           ))}
         </tbody>
