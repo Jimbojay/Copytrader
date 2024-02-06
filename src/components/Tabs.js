@@ -5,27 +5,13 @@ const Tabs = () => {
 
   return (
     <Nav variant="pills" defaultActiveKey="/" className ='justify-content-center my-4'>
-      <LinkContainer to="/">
-        <Nav.Link>Swap</Nav.Link>
-      </LinkContainer>
-      <LinkContainer to="/deposit">
-        <Nav.Link>Deposit</Nav.Link>
-      </LinkContainer>     
-      // {/*
-      // */}
-      <LinkContainer to="/Withdraw">
-        <Nav.Link>Withdraw</Nav.Link>
-      </LinkContainer>
-      <LinkContainer to="/Charts">
-        <Nav.Link>Charts</Nav.Link>
-      </LinkContainer>
       <LinkContainer to="/ShadowTransactions">
         <Nav.Link>Shadow Transactions</Nav.Link>
       </LinkContainer>
       <LinkContainer to="/ShadowAddressManager">
         <Nav.Link>Shadow Addresses</Nav.Link>
       </LinkContainer>
-      <LinkContainer to="/CopyTransactions">
+      <LinkContainer to="/PandL">
         <Nav.Link>P&L Copied transactions</Nav.Link>
       </LinkContainer>
     </Nav>
@@ -33,3 +19,6 @@ const Tabs = () => {
 }
 
 export default Tabs;
+
+      // {/*
+      // */}

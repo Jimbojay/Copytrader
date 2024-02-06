@@ -12,8 +12,10 @@ import Withdraw from './Withdraw';
 import Charts from './Charts';
 import ShadowTransactions from './ShadowTransactions';
 import ShadowAddressManager from './ShadowAddresses';
+import PandL from './PandL';
 
 // import '../CustomStyle.css';
+
 
 import { 
   loadProvider,
@@ -71,6 +73,7 @@ function App() {
           <Route path="/charts" element={<Charts />} />
           <Route path="/shadowTransactions" element={<ShadowTransactions />} />
           <Route path="/shadowAddressManager" element={<ShadowAddressManager />} />
+          <Route path="/PandL" element={<PandL />} />
         </Routes>
 
       </HashRouter>

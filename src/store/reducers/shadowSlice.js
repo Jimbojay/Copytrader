@@ -2,7 +2,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = [
-  { alias: 'WarrenBuffet1', walletAddress: '0xb3dC55698077b07DC7BEC0b65cc15aF63116D811' },
+  { alias: 'WarrenBuffet1', walletAddress: '0x95A5A3a9bDFdF011061d3D304E67666362F73B4a' },
   { alias: 'AlexBecker1', walletAddress: '0xca74f404e0c7bfa35b13b511097df966d5a65597' },
   // Add more initial data here
 ];
