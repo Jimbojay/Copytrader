@@ -3,11 +3,11 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = [
   { alias: 'WarrenBuffet1', walletAddress: '0x95A5A3a9bDFdF011061d3D304E67666362F73B4a' },
-  { alias: 'AlexBecker1', walletAddress: '0xca74f404e0c7bfa35b13b511097df966d5a65597' },
+  // { alias: 'AlexBecker1', walletAddress: '0xca74f404e0c7bfa35b13b511097df966d5a65597' },
   // Add more initial data here
 ];
 
-const shadowSlice = createSlice({
+const shadowAddresses = createSlice({
   name: 'shadows',
   initialState,
   reducers: {
@@ -21,6 +21,6 @@ const shadowSlice = createSlice({
   },
 });
 
-export const { addShadowAddress, removeShadowAddress } = shadowSlice.actions;
+export const { addShadowAddress, removeShadowAddress } = shadowAddresses.actions;
 
-export default shadowSlice.reducer;
+export default shadowAddresses.reducer;

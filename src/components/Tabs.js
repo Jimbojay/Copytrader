@@ -5,7 +5,7 @@ const Tabs = () => {
 
   return (
     <Nav variant="pills" defaultActiveKey="/" className ='justify-content-center my-4'>
-      <LinkContainer to="/ShadowTransactions">
+      <LinkContainer to="/">
         <Nav.Link>Shadow Transactions</Nav.Link>
       </LinkContainer>
       <LinkContainer to="/ShadowAddressManager">
@@ -13,6 +13,9 @@ const Tabs = () => {
       </LinkContainer>
       <LinkContainer to="/PandL">
         <Nav.Link>P&L Copied transactions</Nav.Link>
+      </LinkContainer>
+       <LinkContainer to="/Roadmap">
+        <Nav.Link>Roadmap</Nav.Link>
       </LinkContainer>
     </Nav>
   );

@@ -6,13 +6,14 @@ import { Container } from 'react-bootstrap'
 // Components
 import Navigation from './Navigation';
 import Tabs from './Tabs';
-import Swap from './Swap';
-import Deposit from './Deposit';
-import Withdraw from './Withdraw';
-import Charts from './Charts';
+// import Swap from './Swap';
+// import Deposit from './Deposit';
+// import Withdraw from './Withdraw';
+// import Charts from './Charts';
 import ShadowTransactions from './ShadowTransactions';
 import ShadowAddressManager from './ShadowAddresses';
 import PandL from './PandL';
+import Roadmap from './Roadmap';
 
 // import '../CustomStyle.css';
 
@@ -47,8 +48,8 @@ function App() {
 
     
     // Initiate contracts
-    await loadTokens(provider, chainId, dispatch)
-    await loadAMM(provider, chainId, dispatch)
+    // await loadTokens(provider, chainId, dispatch)
+    // await loadAMM(provider, chainId, dispatch)
     // console.log(`test`)
   }
 
@@ -66,15 +67,13 @@ function App() {
 
         <Tabs />
 
-        <Routes>
-          <Route exact path="/" element={<Swap />} />
-          <Route path="/deposit" element={<Deposit />} />
-          <Route path="/withdraw" element={<Withdraw />} />
-          <Route path="/charts" element={<Charts />} />
-          <Route path="/shadowTransactions" element={<ShadowTransactions />} />
-          <Route path="/shadowAddressManager" element={<ShadowAddressManager />} />
-          <Route path="/PandL" element={<PandL />} />
-        </Routes>
+<Routes>
+  <Route path="/" element={<ShadowTransactions />} />
+  <Route path="/shadowAddressManager" element={<ShadowAddressManager />} />
+  <Route path="/PandL" element={<PandL />} />
+  <Route path="/Roadmap" element={<Roadmap />} />
+</Routes>
+
 
       </HashRouter>
     </Container>

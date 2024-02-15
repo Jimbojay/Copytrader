@@ -5,13 +5,13 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
 
-import { addShadowAddress, removeShadowAddress } from '../store/reducers/shadowSlice'; // Import the actions
+import { addShadowAddress, removeShadowAddress } from '../store/reducers/shadowAddresses'; // Import the actions
 
 import etherscanLogo from '../logo-etherscan.png';
 
 const ShadowAddressManager = () => {
   const dispatch = useDispatch();
-  const shadows = useSelector((state) => state.shadowSlice) || [];
+  const shadows = useSelector((state) => state.shadowAddresses) || [];
 
   const [newAlias, setNewAlias] = useState('');
   const [newWalletAddress, setNewWalletAddress] = useState('');

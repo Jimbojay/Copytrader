@@ -7,21 +7,23 @@ import '../CustomStyle.css';
 
 import logo from '../DappAstra_logo.png';
 
-import { loadAccount, loadBalances } from '../store/interactions'
+import { loadAccount
+// , loadBalances 
+} from '../store/interactions'
 
 import config from '../config.json'
 
 const Navigation = () => {
   const chainId = useSelector(state => state.provider.chainId)
   const account = useSelector(state => state.provider.account)
-  const tokens = useSelector(state => state.tokens.contracts)
-  const amm = useSelector(state => state.amm.contract)
+  // const tokens = useSelector(state => state.tokens.contracts)
+  // const amm = useSelector(state => state.amm.contract)
 
   const dispatch = useDispatch()
 
   const connectHandler = async () => {
     const account = await loadAccount(dispatch)
-    await loadBalances(amm, tokens, account, dispatch)
+    // await loadBalances(amm, tokens, account, dispatch)
   }
 
   const networkHandler = async (e) => {
