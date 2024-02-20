@@ -27,11 +27,11 @@ import {
 	swapFail
 } from './reducers/amm'
 
-import {
-	setCopyContracts,
-	setCopySymbols,
-	setCopyDecimals
-} from './reducers/COPY_tokens'
+// import {
+// 	setCopyContracts,
+// 	setCopySymbols,
+// 	setCopyDecimals
+// } from './reducers/COPY_tokens'
 
 
 // ABIs: Import your contract ABIs here
@@ -225,39 +225,36 @@ export const loadAllSwaps = async (provider, amm, dispatch) => {
 // Swap2
 /////////////
 
-export const swapTokens = async (provider, token1, token2, decimalsToken1, decimalsToken2, amount, slippage = "50")  => {
+export const swapTokens = async (provider, tokenFrom, tokenTo, decimalsTokenFrom, decimalsTokenTo, amount, slippage = "50")  => {
 
-	console.log(provider, token1, token2, decimalsToken1, decimalsToken2, amount)
+	// console.log(provider, tokenFrom, tokenTo, decimalsTokenTo, decimalsTokenTo, amount)
 
 	const signer = await provider.getSigner()
 	console.log("signer:", signer);
 	const signerAddress = await signer.getAddress()
-  console.log("signerAddress:", signerAddress);
+  console.log("signeraddress:", signerAddress);
 
-	// let transaction
 
-	// transaction = await token.connect(signer).approve(amm.address, amount)
-	// await transaction.wait()
 
   // console.log("Value of token2:", token2);
   // console.log("Value of token1:", token1);
   // console.log("decimalsToken2 of token2:", decimalsToken2);
 
-  const Token2 = new Token(
+  const TokenTo = new Token(
       1,
-      token2,
-      decimalsToken2
+      tokenTo,
+      decimalsTokenTo
   );
 
-  console.log("Token2instance:", Token2);
+  console.log("TokenTo:", TokenTo);
 
-  const Token1 = new Token(
+  const TokenFrom = new Token(
       1,
-      token1,
-      decimalsToken1
+      tokenFrom,
+      decimalsTokenFrom
   );
   
-  console.log("Token1instance:", Token1);
+  console.log("TokenFrom:", TokenFrom);
 
 	// const Token2 = new Token(
 	//     UNISWAP.ChainId.RINKEBY,
@@ -267,16 +264,27 @@ export const swapTokens = async (provider, token1, token2, decimalsToken1, decim
 
 	// const Token1 = WETH[DAI.chainId]
 
+
+
   try {
 
 
-      const pair = await Fetcher.fetchPairData(Token1, Token2, providerRPC); //creating instances of a pair
-      const route = await new Route([pair], Token2); // a fully specified path from input token to output token
+      const pair = await Fetcher.fetchPairData(TokenTo, TokenFrom, providerRPC); //creating instances of a pair
+      const route = await new Route([pair], TokenFrom); // a fully specified path from input token to output token
       
       // Convert amount to Wei
       // console.log("Amount:", amount);
-      let amountIn = ethers.utils.parseEther(amount.toString());
-      amountIn = amountIn.toString();
+      let amountIn = ethers.utils.parseUnits(amount.toString(),decimalsTokenFrom);
+
+			const TOKEN_CONTRACT = new ethers.Contract(tokenFrom, TOKEN_ABI, providerRPC)
+
+			// console.log("TOKEN_CONTRACT:", TOKEN_CONTRACT)
+			// console.log("signer:", signer)
+			// console.log("UNISWAP_ROUTER_CONTRACT:", UNISWAP_ROUTER_CONTRACT.address)
+			console.log("amount:", amountIn)
+
+
+      // amountIn = amountIn.toString();
       // console.log("Amount in Wei:", amountIn);
 
       // Logging token2 and amountIn before creating TokenAmount
@@ -285,11 +293,15 @@ export const swapTokens = async (provider, token1, token2, decimalsToken1, decim
       // console.log("Type of amountIn:", typeof amountIn);
       // console.log("Value of amountIn:", amountIn);
 
+
+
       const slippageTolerance = new Percent(slippage, "10000"); // 50 bips, or 0.50% - Slippage tolerance
+
+      console.log("slippageTolerance:", slippageTolerance)
 
       const trade = new Trade( //information necessary to create a swap transaction.
               route,
-              new TokenAmount(Token2, amountIn),
+              new TokenAmount(TokenFrom, amountIn),
               TradeType.EXACT_INPUT
       );
 
@@ -298,30 +310,61 @@ export const swapTokens = async (provider, token1, token2, decimalsToken1, decim
       const amountOutMin = trade.minimumAmountOut(slippageTolerance).raw; // needs to be converted to e.g. hex
       // console.log
       const amountOutMinHex = ethers.BigNumber.from(amountOutMin.toString()).toHexString();
-      const path = [token2, token1]; //An array of token addresses
+      const path = [tokenFrom, tokenTo]; //An array of token addresses
       const to = signerAddress; // should be a checksummed recipient address
       const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes from the current Unix time
       const value = trade.inputAmount.raw; // // needs to be converted to e.g. hex
       const valueHex = await ethers.BigNumber.from(value.toString()).toHexString(); //convert to hex string
 
       console.log("valueHex:", valueHex);
-  
-  		// console.log(amountOutMinHex, path, to, deadline)
-      //Return a copy of transactionRequest, The default implementation calls checkTransaction and resolves to if it is an ENS name, adds gasPrice, nonce, gasLimit and chainId based on the related operations on Signer.
-      const rawTxn = await UNISWAP_ROUTER_CONTRACT.populateTransaction.swapExactETHForTokens(amountOutMinHex, path, to, deadline, {
-          value: valueHex
-      })
 
-			console.log("rawTxn:", rawTxn);
-  
+			////////////////////////////////
 
-			// Sending the transaction and getting the Transaction Response object
-			let sendTxn = await signer.sendTransaction(rawTxn);
-			console.log("Transaction Response:", sendTxn);
+      let sendTxn
+
+			if (tokenFrom == "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2") {
+	  		// console.log(amountOutMinHex, path, to, deadline)
+	      //Return a copy of transactionRequest, The default implementation calls checkTransaction and resolves to if it is an ENS name, adds gasPrice, nonce, gasLimit and chainId based on the related operations on Signer.
+	      const rawTxn = await UNISWAP_ROUTER_CONTRACT.populateTransaction.swapExactETHForTokens(amountOutMinHex, path, to, deadline, {
+	          value: valueHex
+	      })
+
+				console.log("rawTxn:", rawTxn);
+	  
+
+				// Sending the transaction and getting the Transaction Response object
+				sendTxn = await signer.sendTransaction(rawTxn);
+				console.log("Transaction Response:", sendTxn);
+			} else  {
+
+				let transaction
+
+				transaction = await TOKEN_CONTRACT.connect(signer).approve(ethers.utils.getAddress(UNISWAP_ROUTER_CONTRACT.address), amountIn)
+	    	await transaction.wait()
+				console.log("transaction:", transaction)
+
+				console.log("signerAddress:", signerAddress)
+				console.log("amm address:", ethers.utils.getAddress(UNISWAP_ROUTER_CONTRACT.address))
+
+				const allowance = await TOKEN_CONTRACT.allowance(signerAddress, ethers.utils.getAddress(UNISWAP_ROUTER_CONTRACT.address));
+	    	console.log("allowance:", allowance)
+
+				// await transaction.wait()
+
+				console.log("transaction post:", transaction)
+
+				transaction = await UNISWAP_ROUTER_CONTRACT.connect(signer).swapExactTokensForETH(amountIn, amountOutMinHex, path, signerAddress, deadline);
+				await transaction.wait()
+				console.log("transaction:", transaction)
+				
+			}
+
+			//////////////
+  
 
 			// Waiting for the transaction to be mined and getting the Transaction Receipt
-			let receipt = await sendTxn.wait();
-			console.log("Transaction Receipt:", receipt);
+			// let receipt = await sendTxn.wait();
+			// console.log("Transaction Receipt:", receipt);
 			
 
       // //Logs the information about the transaction it has been mined.

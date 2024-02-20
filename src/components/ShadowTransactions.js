@@ -10,6 +10,8 @@ import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 
 import etherscanLogo from '../logo-etherscan.png';
+import metamaskLogo from '../logo_metamask.png';
+
 import UNISWAP_ROUTER_ABI from '../abis/UniswapV2_Router.json';
 import UNISWAP_ABI from '../abis/UniswapV2.json';
 import UNISWAP_FACTORY_ABI from '../abis/UniswapV2_Factory.json';
@@ -83,10 +85,37 @@ const TransactionsTable = () => {
         return _rate;
     }
 
+    async function addTokenToMetaMask(tokenAddress, symbol, decimals) {
+      try {
+        // Check if MetaMask is installed
+        if (!window.ethereum) throw new Error("MetaMask is not installed");
+
+        console.error('MetaMask:', tokenAddress, symbol, decimals);
+
+        const wasAdded = await window.ethereum.request({
+          method: 'wallet_watchAsset',
+          params: {
+            type: 'ERC20', // Initially only supports ERC20, but other standards may be added
+            options: {
+              address: tokenAddress, // The address of the token contract
+              symbol: symbol, // A ticker symbol or shorthand, up to 5 characters
+              decimals: decimals, // The number of token decimals
+              // You can also add an image URL for the token here
+            },
+          },
+        });
+
+        if (wasAdded) {
+          console.log('Token was added to MetaMask');
+        } else {
+          console.log('Token was not added to MetaMask');
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
 
     const shadows = useSelector((state) => state.shadowAddresses) || [];
-
-
 
     // Extract all shadowAddresses into a separate array and convert them to lowercase
     const shadowAddresses = shadows
@@ -123,6 +152,8 @@ const TransactionsTable = () => {
         // Call swapTokens function with the required parameters
         await swapTokens(provider, tx.swapDetails.tokenFrom, tx.swapDetails.tokenTo, tx.swapDetails.decimalsFromToken, tx.swapDetails.decimalsToToken, amount);
     };
+
+
 
     useEffect(() => {
         const fetchTransactionsAndReceipts = async () => {
@@ -286,10 +317,8 @@ const TransactionsTable = () => {
                         {/* <th>Current Rate</th> */}
                         <th>% rate change since swap</th>
                         <th>Time Since swap</th>
-                        <th>Swap amount</th>
-                        <th>Copy</th>
+                        <th>Swap</th>
                         <th>Transaction</th>
-                        <th>Test</th>
                         {/* <th>Event Names</th> */}
                     </tr>
                 </thead>
@@ -318,10 +347,18 @@ const TransactionsTable = () => {
                           </a>
                         </td>
                         {/* Render symbol as hyperlink to Etherscan */}
-                        <td>
+                        <td style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                           <a href={tokenToEtherscanLink} target="_blank" rel="noopener noreferrer">
                             {tokenToSymbol}
                           </a>
+                          <Button
+                            variant="outline-secondary"
+                            size="sm"
+                            style={{ marginLeft: 'auto' }} // Pushes the button to the right
+                            onClick={() => addTokenToMetaMask(tx.swapDetails.tokenTo, tokenToSymbol, tokenDetailsCache[tx.swapDetails.tokenTo]?.decimals)}
+                          >
+                            <img src={metamaskLogo} alt="Add to MetaMask" style={{ width: '18px', height: '18px' }} />
+                          </Button>
                         </td>
                         <td>{formatTokenAmount(tx.swapDetails.tokenFromAmount)}</td>
                         <td>{formatTokenAmount(tx.swapDetails.tokenToAmount)}</td>
@@ -329,28 +366,6 @@ const TransactionsTable = () => {
                         {/* <td>{formatTokenAmount(tx.swapDetails.currentRate)}</td> */}
                         <td>{tx.swapDetails.percentageDifference}%</td>
                         <td>{tx.swapDetails.timeSince}</td>
-                        <td>
-                          <input
-                              type="number"
-                              placeholder="Input swap amount"
-                              value={inputValues[tx.hash] || ''}
-                              onChange={(e) => handleInputChange(tx.hash, e.target.value)}
-                          />
-                        </td>
-                        <td>
-                          <Button variant="primary" onClick={() => handleCopy(tx.hash)}>
-                              Copy
-                          </Button>
-                           <Button variant="success" onClick={() => handleSwap(tx)}>Swap</Button>
-                        </td>
-                        <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                          <a href={`https://etherscan.io/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer">
-                              <img src={etherscanLogo} alt="Etherscan Logo" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} />
-                          </a>
-                        </td>
-                        {/* <td>{tx.hash}</td>  */}
-
-
                         <td>
                           <Form onSubmit={(e) => e.preventDefault()}>
                             <InputGroup>
@@ -369,8 +384,12 @@ const TransactionsTable = () => {
                             </InputGroup>
                           </Form>
                         </td>
-
-
+                        <td style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                          <a href={`https://etherscan.io/tx/${tx.hash}`} target="_blank" rel="noopener noreferrer">
+                              <img src={etherscanLogo} alt="Etherscan Logo" style={{ width: '24px', height: '24px', verticalAlign: 'middle' }} />
+                          </a>
+                        </td>
+                        {/* <td>{tx.hash}</td>  */}
                         {/* <td>
                           {tx.swapDetails.decodedLogNames.join(", ")}
                         </td> */}
