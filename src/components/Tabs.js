@@ -11,9 +11,6 @@ const Tabs = () => {
       <LinkContainer to="/ShadowAddressManager">
         <Nav.Link>Shadow Addresses</Nav.Link>
       </LinkContainer>
-      <LinkContainer to="/PandL">
-        <Nav.Link>P&L Copied transactions</Nav.Link>
-      </LinkContainer>
        <LinkContainer to="/Roadmap">
         <Nav.Link>Roadmap</Nav.Link>
       </LinkContainer>

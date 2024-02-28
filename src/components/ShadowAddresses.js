@@ -7,7 +7,7 @@ import Table from 'react-bootstrap/Table';
 
 import { addShadowAddress, removeShadowAddress } from '../store/reducers/shadowAddresses'; // Import the actions
 
-import etherscanLogo from '../logo-etherscan.png';
+import etherscanLogo from '../logo-etherscan_transparant.png';
 
 const ShadowAddressManager = () => {
   const dispatch = useDispatch();
@@ -131,6 +131,7 @@ const ShadowAddressManager = () => {
                 <Form.Group controlId="walletAddress">
                   <Form.Label>Wallet Address</Form.Label>
                   <Form.Control
+                    style={{ backgroundColor: '#333', color: '#fff' }}
                     type="text"
                     className="disabled-input"
                     readOnly

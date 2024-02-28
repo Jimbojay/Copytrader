@@ -5,7 +5,7 @@ import Button from 'react-bootstrap/Button'
 import Blockies from 'react-blockies'
 import '../CustomStyle.css';
 
-import logo from '../DappAstra_logo.png';
+import logo from '../DappAstra_logo_transparent.png';
 
 import { loadAccount
 // , loadBalances 

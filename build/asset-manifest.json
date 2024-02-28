@@ -1,0 +1,16 @@
+{
+  "files": {
+    "main.css": "/static/css/main.428816a6.css",
+    "main.js": "/static/js/main.09f2856b.js",
+    "static/js/787.a6d60757.chunk.js": "/static/js/787.a6d60757.chunk.js",
+    "static/media/DappAstra_logo.png": "/static/media/DappAstra_logo.9d84fb5e28bc1aa425a7.png",
+    "index.html": "/index.html",
+    "main.428816a6.css.map": "/static/css/main.428816a6.css.map",
+    "main.09f2856b.js.map": "/static/js/main.09f2856b.js.map",
+    "787.a6d60757.chunk.js.map": "/static/js/787.a6d60757.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.428816a6.css",
+    "static/js/main.09f2856b.js"
+  ]
+}
