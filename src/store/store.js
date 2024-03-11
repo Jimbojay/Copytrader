@@ -4,7 +4,7 @@ import provider from './reducers/provider'
 import tokens from './reducers/tokens'
 import amm from './reducers/amm'
 import shadowAddresses from './reducers/shadowAddresses'
-import COPY_tokens from './reducers/COPY_tokens'
+import shadowTransactions from './reducers/shadowTransactions'
 
 export const store = configureStore({
 	reducer: {
@@ -12,7 +12,7 @@ export const store = configureStore({
 		tokens,
 		amm,
 		shadowAddresses,
-		COPY_tokens,
+		shadowTransactions,
 	},
 	middleware: getDefaultMiddleware =>
 		getDefaultMiddleware({

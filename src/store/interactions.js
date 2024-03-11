@@ -254,7 +254,7 @@ export const loadAllSwaps = async (provider, amm, dispatch) => {
 // Swap2
 /////////////
 
-export const swapTokens = async (provider, tokenFrom, tokenTo, decimalsTokenFrom, decimalsTokenTo, amount, slippage = "500")  => {
+export const swapTokens = async (provider, tokenFrom, tokenTo, decimalsTokenFrom, decimalsTokenTo, amount, slippage)  => {
 
 	const signer = await provider.getSigner()
 	const signerAddress = await signer.getAddress()
@@ -282,9 +282,11 @@ export const swapTokens = async (provider, tokenFrom, tokenTo, decimalsTokenFrom
 		// Initiate token contract
 		const TOKEN_CONTRACT = new ethers.Contract(tokenFrom, TOKEN_ABI, providerRPC)
 
-		const slippageTolerance = new Percent(slippage, "50"); // 50 bips, or 0.50% - Slippage tolerance
+		const _slippage = slippage * 10
+		console.log(_slippage)
 
-		console.log("slippageTolerance:", slippageTolerance)
+		const slippageTolerance = new Percent(_slippage, '1000'); // 50 bips, or 0.50% - Slippage tolerance
+		console.log("slippageTolerance:", slippageTolerance	)
 
 		// Setup trade parameters
 		const trade = new Trade( //information necessary to create a swap transaction.
@@ -296,7 +298,7 @@ export const swapTokens = async (provider, tokenFrom, tokenTo, decimalsTokenFrom
 		const amountOutMin = trade.minimumAmountOut(slippageTolerance).raw; // needs to be converted to e.g. hex
 		const amountOutMinHex = ethers.BigNumber.from(amountOutMin.toString()).toHexString();
 		const path = [tokenFrom, tokenTo]; //An array of token addresses
-		const to = signerAddress; // should be a checksummed recipient address
+		// const to = signerAddress; // should be a checksummed recipient address
 		const deadline = Math.floor(Date.now() / 1000) + 60 * 20; // 20 minutes from the current Unix time
 		const value = trade.inputAmount.raw; // // needs to be converted to e.g. hex
 		const valueHex = await ethers.BigNumber.from(value.toString()).toHexString(); //convert to hex string
@@ -322,11 +324,16 @@ export const swapTokens = async (provider, tokenFrom, tokenTo, decimalsTokenFrom
 		// } else  {
 
 		//Approve
+
+		console.log("TEST_amountif:", amountIn)
+		console.log("TEST_signer:", signerAddress.toString())
+		console.log("TEST_UNI_Address:", ethers.utils.getAddress(UNISWAP_ROUTER_CONTRACT.address))
+
 		transaction = await TOKEN_CONTRACT.connect(signer).approve(ethers.utils.getAddress(UNISWAP_ROUTER_CONTRACT.address), amountIn)
 		await transaction.wait()
 		console.log("approval:", transaction)
 
-		waitForConfirmation(provider, transaction.hash, 3);
+		// waitForConfirmation(provider, transaction.hash, 3);
 
 		let allowance;
 		try {
@@ -348,7 +355,11 @@ export const swapTokens = async (provider, tokenFrom, tokenTo, decimalsTokenFrom
 		transaction = await UNISWAP_ROUTER_CONTRACT.connect(signer).swapExactTokensForTokens(amountIn, amountOutMinHex, path, signerAddress, deadline);
 		const reciept = await transaction.wait()
 		console.log("reciept1:", reciept)
-		const allowance1 = await TOKEN_CONTRACT.allowance(signerAddress.toString(), ethers.utils.getAddress(UNISWAP_ROUTER_CONTRACT.address).toString());
+
+		waitForConfirmation(provider, transaction.hash, 3);
+
+		let allowance1;
+		allowance1 = await TOKEN_CONTRACT.allowance(signerAddress.toString(), ethers.utils.getAddress(UNISWAP_ROUTER_CONTRACT.address).toString());
 		console.log("allowance1:", allowance1);
 
 		// 	}

@@ -67,16 +67,19 @@ function App() {
 
         <Tabs />
 
-<Routes>
-  <Route path="/" element={<ShadowTransactions />} />
-  <Route path="/shadowAddressManager" element={<ShadowAddressManager />} />
-  <Route path="/PandL" element={<PandL />} />
-  <Route path="/Roadmap" element={<Roadmap />} />
-</Routes>
-
+        <hr />
+        
+        <Routes>
+          <Route path="/" element={<ShadowTransactions />} />
+          <Route path="/shadowAddressManager" element={<ShadowAddressManager />} />
+          <Route path="/PandL" element={<PandL />} />
+          <Route path="/Roadmap" element={<Roadmap />} />
+        </Routes>
 
       </HashRouter>
+
     </Container>
+    
   )
 }
 

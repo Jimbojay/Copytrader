@@ -2,15 +2,20 @@ import axios from 'axios';
 import { ethers } from 'ethers';
 import React, { useState, useEffect, useMemo } from 'react';
 import Table from 'react-bootstrap/Table';
-// import Select from 'react-select';
+import Select from 'react-select';
 import Button from 'react-bootstrap/Button';
 import Spinner from 'react-bootstrap/Spinner';
 import { useSelector } from 'react-redux';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
+import Alert from 'react-bootstrap/Alert';
+import { Modal } from 'react-bootstrap';
+import { FiSettings } from 'react-icons/fi';
 
 import etherscanLogo from '../logo-etherscan_transparant.png';
 import metamaskLogo from '../logo_metamask.png';
+
+import styleSelectBox from '../helpers/styling';
 
 import UNISWAP_ROUTER_ABI from '../abis/UniswapV2_Router.json';
 import UNISWAP_ABI from '../abis/UniswapV2.json';
@@ -26,40 +31,48 @@ import {
 
 import {
     formatTokenAmount,
-    getTimeSince
+    getTimeSince,
+    addTokenToMetaMask
 } from '../helpers/helpers'
 
 const etherscanApiKey = process.env.REACT_APP_etherscanApiKey
 const INFURA_API_KEY = process.env.REACT_APP_INFURA_API_KEY;
 const providerRPC = new ethers.providers.JsonRpcProvider(`https://mainnet.infura.io/v3/${INFURA_API_KEY}`);
 
-// const POKT_APP_KEY = process.env.REACT_APP_POKT_APP_KEY;
-// const providerRPC = new ethers.providers.JsonRpcProvider(`https://eth-mainnet.rpc.grove.city/v1/${POKT_APP_KEY}`);
-
 const address_Router = '0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D';
 const address_Factory = '0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f';
-
-// let Count = 0;
 
 const TransactionsTable = () => {
 
   const account = useSelector(state => state.provider.account)
   const provider = useSelector(state => state.provider.connection)
 
+  //Loading states
+  const [loadingStatus, setLoadingStatus] = useState({
+    transactions: false,
+    decoding: false
+  });
+  //Related to original transaction
+  const [receipts, setReceipts] = useState([]);
+
+  //Parameters copy trade
+  const [inputValues, setInputValues] = useState({});
+  const [slippage, setSlippage] = useState('0.5');
+
+  // Front-end table filters
+  const [selectedAlias, setSelectedAlias] = useState([]);
+  const [selectedTokenTo, setSelectedTokenTo] = useState([]);
+  // Add state for filtered transactions
+  const [filteredReceipts, setFilteredReceipts] = useState([]);
+
+  //States for setting-gear icon
+  const [showSlippageModal, setShowSlippageModal] = useState(false);
+  const handleSlippageModalClose = () => setShowSlippageModal(false);
+  const handleSlippageModalShow = () => setShowSlippageModal(true); 
+
   const factoryContract = new ethers.Contract(address_Factory, UNISWAP_FACTORY_ABI, providerRPC);
 
   const tokenDetailsCache = useMemo(() => ({}), []);
-
-  // const [aliasFilter, setAliasFilter] = useState('');
-  // const [tokenFilter, setTokenFilter] = useState('');
-
-  // const handleAliasFilterChange = (event) => {
-  //   setAliasFilter(event.target.value);
-  // };
-
-  // const handleTokenFilterChange = (event) => {
-  //   setTokenFilter(event.target.value);
-  // };
 
   async function getOrFetchTokenDetails(tokenAddress) {
     if (!tokenDetailsCache[tokenAddress]) {
@@ -73,7 +86,7 @@ const TransactionsTable = () => {
     return tokenDetailsCache[tokenAddress];
   }
 
-  async function getTokenReserves(token0Address, token1Address, tokenFromDecimals, tokenToDecimals) {
+  async function getRate(token0Address, token1Address, tokenFromDecimals, tokenToDecimals) {
     const pairAddress = await factoryContract.getPair(token0Address, token1Address);
     const pairContract = new ethers.Contract(pairAddress, UNISWAP_ABI, providerRPC);
     const reserves = await pairContract.getReserves();
@@ -88,37 +101,6 @@ const TransactionsTable = () => {
     }
     return _rate;
   }
-
-  async function addTokenToMetaMask(tokenAddress, symbol, decimals) {
-    try {
-      // Check if MetaMask is installed
-      if (!window.ethereum) throw new Error("MetaMask is not installed");
-
-      console.log('MetaMask:', tokenAddress, symbol, decimals);
-
-      const wasAdded = await window.ethereum.request({
-        method: 'wallet_watchAsset',
-        params: {
-          type: 'ERC20', // Initially only supports ERC20, but other standards may be added
-          options: {
-            address: tokenAddress, // The address of the token contract
-            symbol: symbol, // A ticker symbol or shorthand, up to 5 characters
-            decimals: decimals, // The number of token decimals
-            // You can also add an image URL for the token here
-          },
-        },
-      });
-
-      if (wasAdded) {
-        console.log('Token was added to MetaMask');
-      } else {
-        console.log('Token was not added to MetaMask');
-      }
-    } catch (error) {
-      console.error(error);
-    }
-  }
-
   const shadows = useSelector((state) => state.shadowAddresses) || [];
 
   // Extract all shadowAddresses into a separate array and convert them to lowercase
@@ -130,16 +112,7 @@ const TransactionsTable = () => {
   }));
 
 
-
-  const [receipts, setReceipts] = useState([]);
-  const [loadingStatus, setLoadingStatus] = useState({
-    transactions: false,
-    decoding: false,
-    receipts: false,
-  });
-
   // New state to track input values
-  const [inputValues, setInputValues] = useState({});
 
   const handleInputChange = (hash, value) => {
     // Check if the input value is negative
@@ -163,7 +136,15 @@ const TransactionsTable = () => {
       // console.log('test:', amount, inputValues, tx.hash, tx);
 
       // Call swapTokens function with the required parameters
-      await swapTokens(provider, tx.swapDetails.tokenFrom, tx.swapDetails.tokenTo, tx.swapDetails.decimalsFromToken, tx.swapDetails.decimalsToToken, amount);
+      await swapTokens(
+        provider, 
+        tx.swapDetails.tokenFrom, 
+        tx.swapDetails.tokenTo, 
+        tx.swapDetails.decimalsFromToken, 
+        tx.swapDetails.decimalsToToken, 
+        amount
+        ,slippage
+      );
 
       // Clear the input field after successful swap
       setInputValues(prev => ({ ...prev, [tx.hash]: '' }));
@@ -172,14 +153,30 @@ const TransactionsTable = () => {
     }
   };
 
+  // Handle input change for slippage
+  const handleSlippageChange = (e) => {
+    setSlippage(e.target.value);
+  };
 
+  // Validate slippage on blur
+  const validateSlippage = () => {
+    if (slippage && parseFloat(slippage) < 0.5) {
+      alert("The minimum slippage is 0.5%"); // Show popup error
+      setSlippage(''); // Optionally reset the invalid input
+    }
+  };
 
   useEffect(() => {
     const fetchTransactionsAndReceipts = async () => {
+      const apiCallLabel = `API Call Time ${new Date().getTime()}`; 
+      const transformLabel = `Transform Time ${new Date().getTime()}`; 
 
-      setLoadingStatus({ transactions: false, decoding: false, receipts: false });
+
+      setLoadingStatus({ transactions: false, decoding: false});
       const contractInterfaceRouter = new ethers.utils.Interface(UNISWAP_ROUTER_ABI);
       const contractInterface = new ethers.utils.Interface(UNISWAP_ABI);
+      console.time(apiCallLabel)
+
       try {
         const currentBlock = await providerRPC.getBlockNumber();
         const blocksPerMonth = 4 * 60 * 24 * 30; // Approximation
@@ -188,12 +185,19 @@ const TransactionsTable = () => {
         const apiUrl = `https://api.etherscan.io/api?module=account&action=txlist&address=${address_Router}&startblock=${startBlock}&endblock=${currentBlock}&sort=desc&apikey=${etherscanApiKey}`;
 
         const response = await axios.get(apiUrl);
+        console.log(response)
+        console.timeEnd(apiCallLabel); 
+        setLoadingStatus({ transactions: true, decoding: false });
+        
+        console.time(transformLabel)
         if (response.data.status === "1" && response.data.message === "OK") {
           const transactions = response.data.result;
 
           const filteredTransactions = transactions.filter(tx =>
             shadowAddresses.some(addr => addr.walletAddress === tx.from.toLowerCase())
           );
+
+          console.log('TEST transactions:', filteredTransactions)
 
           const transactionsWithDetails = await Promise.all(filteredTransactions.map(async tx => {
                 
@@ -208,6 +212,8 @@ const TransactionsTable = () => {
 
             const receipt = await providerRPC.getTransactionReceipt(tx.hash);
 
+            console.log('Receipts:', receipt);  
+
             // Filtering out failed transactions by checking receipt status
             if (receipt.status === 0) {
               console.log(`Skipping failed transaction with hash: ${tx.hash}`);
@@ -218,7 +224,6 @@ const TransactionsTable = () => {
               hash: tx.hash,
               walletAddress: tx.from,
               alias: shadowAddressObj ? shadowAddressObj.alias : 'Unknown', // Use the alias
-              path: undefined,
               tokenFrom: undefined,
               tokenTo: undefined,
               tokenFromAmount: undefined,
@@ -226,13 +231,12 @@ const TransactionsTable = () => {
               effectiveSwapRate: undefined,
               currentRate: undefined,
               percentageDifference: undefined,
-              decodedLogNames: [], // Placeholder for decoded logs,
+              // decodedLogNames: [], // Placeholder for decoded logs,
               decimalsToToken: undefined,
               decimalsFromToken: undefined
             };
 
             if (decodedInputData && decodedInputData.args && decodedInputData.args.path) {
-              swapDetails.path = decodedInputData.args.path
               swapDetails.tokenFrom = decodedInputData.args.path[0];
               swapDetails.tokenTo = decodedInputData.args.path.length > 1 ? decodedInputData.args.path[1] : undefined;
             }
@@ -247,7 +251,7 @@ const TransactionsTable = () => {
             const timeSince = getTimeSince(tx.timeStamp); // Assuming tx.timeStamp is the Unix timestamp of the transaction
             swapDetails.timeSince = timeSince;
 
-            const rate = await getTokenReserves(swapDetails.tokenFrom, swapDetails.tokenTo, decimalsFromToken, decimalsToToken).catch(console.error);
+            const rate = await getRate(swapDetails.tokenFrom, swapDetails.tokenTo, decimalsFromToken, decimalsToToken).catch(console.error);
 
 
             if (rate) {
@@ -261,7 +265,7 @@ const TransactionsTable = () => {
               try {      
                 const decodedLog = contractInterface.parseLog({ topics: log.topics, data: log.data });
                 decodedLogs.push(decodedLog); // Push the entire decoded log
-                swapDetails.decodedLogNames.push(decodedLog.name); // Store only the event names
+                // swapDetails.decodedLogNames.push(decodedLog.name); // Store only the event names
 
                 if (decodedLog.name === "Swap") { 
 
@@ -281,8 +285,8 @@ const TransactionsTable = () => {
                   // Add the effectiveSwapRate to swapDetails
                   swapDetails.effectiveSwapRate = effectiveSwapRate; // Limiting the decimal places for display                            
                   
-                  const uniqueAliases = [...new Set(receipts.map(tx => tx.swapDetails.alias))];
-                  const uniqueTokens = [...new Set(receipts.map(tx => tx.swapDetails.tokenToSymbol))];
+                  // const uniqueAliases = [...new Set(receipts.map(tx => tx.swapDetails.alias))];
+                  // const uniqueTokens = [...new Set(receipts.map(tx => tx.swapDetails.tokenToSymbol))];
                 
                 }
               } catch (error) {
@@ -306,10 +310,12 @@ const TransactionsTable = () => {
             
 
           setReceipts(validTransactions);
-          setLoadingStatus({ transactions: true, decoding: true, receipts: true });
+          setLoadingStatus({ transactions: true, decoding: true });
         } else {
           console.error('No transactions found or error fetching transactions:', response.data.result);
         }
+
+        console.timeEnd(transformLabel)
       } catch (error) {
         console.error('Error fetching transactions or receipts:', error);
       }
@@ -318,14 +324,127 @@ const TransactionsTable = () => {
     fetchTransactionsAndReceipts();
   }, []);
 
-  if (!loadingStatus.transactions || !loadingStatus.decoding || !loadingStatus.receipts) {
-    // return <div>Loading transactions and receipts...</div>;
-    return <div><Spinner animation="border" style={{ display: 'block', margin: '0 auto' }} /></div>;
+  // Extract unique values for Alias and Token to dropdowns
+  const uniqueAliases = useMemo(() => {
+    const aliases = receipts.map(tx => ({ value: tx.swapDetails.alias, label: tx.swapDetails.alias }));
+    return [...new Map(aliases.map(item => [item['value'], item])).values()];
+  }, [receipts]);
+
+  const uniqueTokensTo = useMemo(() => {
+    const tokens = receipts.map(tx => ({ value: tx.swapDetails.tokenTo, label: tokenDetailsCache[tx.swapDetails.tokenTo]?.symbol || 'Unknown Symbol' }));
+    return [...new Map(tokens.map(item => [item['value'], item])).values()];
+  }, [receipts, tokenDetailsCache]);
+
+  // Filtering logic
+  const applyFilters = () => {
+    const filtered = receipts.filter(tx => {
+      const aliasMatch = selectedAlias.length === 0 || selectedAlias.find(alias => alias.value === tx.swapDetails.alias);
+      const tokenToMatch = selectedTokenTo.length === 0 || selectedTokenTo.find(token => token.value === tx.swapDetails.tokenTo);
+      return aliasMatch && tokenToMatch;
+    });
+    setFilteredReceipts(filtered);
+  };
+
+  // Use useEffect to initialize filteredReceipts with all receipts on component mount or when receipts change
+  useEffect(() => {
+    setFilteredReceipts(receipts);
+  }, [receipts]);
+  
+
+  // if (!loadingStatus.transactions || !loadingStatus.decoding) {
+  //   // return <div>Loading transactions and receipts...</div>;
+  //   return <div><Spinner animation="border" style={{ display: 'block', margin: '0 auto' }} /></div>;
+  // }
+
+  if (!loadingStatus.transactions || !loadingStatus.decoding || receipts.length === 0) {
+    let alertMessage = '';
+    if (!loadingStatus.transactions) {
+      alertMessage = "Fetching transactions...";
+    } else if (!loadingStatus.decoding) {
+      alertMessage = "Decoding transactions and logs...";
+    } else if (receipts.length === 0) {
+      alertMessage = "No transactions available...";
+    }       
+
+    return (
+      <div style={{ height: '50vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Alert variant="info" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 'fit-content', padding: '20px' }}>
+          <Spinner animation="border" style={{ marginBottom: '10px' }} />
+          {alertMessage}
+        </Alert>
+      </div>
+    );
+  
   }
 
   return (
     <div style={{ overflowX: 'auto' }}>
-            
+      {/* Render multi-select dropdowns for filtering */}
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', gap: '20px' }}>
+        <div style={{ width: '200px' }}>
+          <Select
+            options={uniqueAliases}
+            onChange={setSelectedAlias}
+            isMulti
+            placeholder="Aliasses"
+            styles={styleSelectBox}
+          />
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}> {/* Adjusted container for dropdown and button */}
+          <div style={{ width: '150px' }}> {/* Reduced width for the dropdown */}
+            <Select
+              options={uniqueTokensTo}
+              onChange={setSelectedTokenTo}
+              isMulti
+              placeholder="Tokens to"
+              styles={styleSelectBox}
+            />
+          </div>
+          {/* Place the Apply Filter button next to the dropdown */}
+          <Button variant="success" onClick={applyFilters} style={{ marginTop: '0px' }}>Apply Filter</Button> {/* Removed the marginTop for alignment */}
+        </div>
+        {/* Input box for Slippage % */}
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <Button variant="outline-secondary" onClick={handleSlippageModalShow}>
+          <FiSettings />
+        </Button>
+        </div>
+
+        <Modal show={showSlippageModal} onHide={handleSlippageModalClose} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Set Slippage Tolerance</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            {/* Slippage input form */}
+            <Form>
+              <Form.Group>
+                <Form.Label>Slippage %</Form.Label>
+                <Form.Control
+                  type="number"
+                  min="0.5"
+                  step="0.1"
+                  placeholder=">0.5"
+                  value={slippage} // Ensure this variable is defined in your state
+                  onChange={handleSlippageChange} // And this handler
+                  onBlur={validateSlippage} // And also this one
+                />
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleSlippageModalClose}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={handleSlippageModalClose}>
+              Save Changes
+            </Button>
+          </Modal.Footer>
+        </Modal>
+
+      </div>
+      {/* <div style={{ marginBottom: '20px' }}>
+        <Button variant="success" onClick={applyFilters} style={{ marginTop: '10px' }}>Apply Filter</Button>
+      </div> */}
       <Table striped bordered hover responsive>
         <thead>
             <tr>
@@ -344,7 +463,7 @@ const TransactionsTable = () => {
             </tr>
         </thead>
         <tbody>
-          {receipts.map((tx, index) => {
+          {filteredReceipts.map((tx, index) => {
             // Retrieve symbols; fall back to 'Unknown Symbol' if not found
             const tokenFromSymbol = tokenDetailsCache[tx.swapDetails.tokenFrom]?.symbol || 'Unknown Symbol';
             const tokenToSymbol = tokenDetailsCache[tx.swapDetails.tokenTo]?.symbol || 'Unknown Symbol';

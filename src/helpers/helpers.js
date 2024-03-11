@@ -51,7 +51,38 @@ function getTimeSince(timestamp) {
     return `${days} D, ${hours} H, ${minutes} M`;
 }
 
+async function addTokenToMetaMask(tokenAddress, symbol, decimals) {
+    try {
+        // Check if MetaMask is installed
+        if (!window.ethereum) throw new Error("MetaMask is not installed");
+
+        console.log('MetaMask:', tokenAddress, symbol, decimals);
+
+        const wasAdded = await window.ethereum.request({
+        method: 'wallet_watchAsset',
+        params: {
+            type: 'ERC20', // Initially only supports ERC20, but other standards may be added
+            options: {
+            address: tokenAddress, // The address of the token contract
+            symbol: symbol, // A ticker symbol or shorthand, up to 5 characters
+            decimals: decimals, // The number of token decimals
+            // You can also add an image URL for the token here
+            },
+        },
+        });
+
+        if (wasAdded) {
+        console.log('Token was added to MetaMask');
+        } else {
+        console.log('Token was not added to MetaMask');
+        }
+    } catch (error) {
+        console.error(error);
+    }
+    }
+
 module.exports = {
     formatTokenAmount,
-    getTimeSince
+    getTimeSince,
+    addTokenToMetaMask
 }
