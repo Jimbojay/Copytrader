@@ -167,6 +167,7 @@ const TransactionsTable = () => {
   };
 
   useEffect(() => {
+    console.log('testreload: ', "testreload")
     const fetchTransactionsAndReceipts = async () => {
       const apiCallLabel = `API Call Time ${new Date().getTime()}`; 
       const transformLabel = `Transform Time ${new Date().getTime()}`; 

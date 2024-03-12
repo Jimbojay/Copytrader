@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import { Container } from 'react-bootstrap'
@@ -10,7 +10,8 @@ import Tabs from './Tabs';
 // import Deposit from './Deposit';
 // import Withdraw from './Withdraw';
 // import Charts from './Charts';
-import ShadowTransactions from './ShadowTransactions';
+import ShadowTransactions from './TEST_ShadowTransactions';
+// import ShadowTransactions from './ShadowTransactions';
 import ShadowAddressManager from './ShadowAddresses';
 import PandL from './PandL';
 import Roadmap from './Roadmap';
@@ -30,6 +31,9 @@ function App() {
 
   const dispatch = useDispatch()
 
+  const [blockchainDataLoaded, setBlockchainDataLoaded] = useState(false);
+  const [runOnce, setRunOnce] = useState(false);
+
   const loadBlockchainData = async () => {
     // Initiate provider
     const provider = await loadProvider(dispatch)
@@ -46,6 +50,7 @@ function App() {
       await loadAccount(dispatch)
     })
 
+    setBlockchainDataLoaded(true)
     
     // Initiate contracts
     // await loadTokens(provider, chainId, dispatch)
@@ -55,12 +60,14 @@ function App() {
 
   useEffect(() => {
       loadBlockchainData()
-  }, [loadBlockchainData]);
+      {setRunOnce(true)}
+  }, [!blockchainDataLoaded & !runOnce]);
 
   return(
     <Container>
-      <HashRouter>
-      
+      {(blockchainDataLoaded) ? (
+        <HashRouter>
+        
         <Navigation />
 
         <hr />
@@ -76,8 +83,9 @@ function App() {
           <Route path="/Roadmap" element={<Roadmap />} />
         </Routes>
 
-      </HashRouter>
-
+        </HashRouter>
+      
+      ) : (<></>)}
     </Container>
     
   )

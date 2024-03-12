@@ -1,6 +1,6 @@
 import React from 'react';
 
-const ShadowTransactions = () => {
+const Roadmap = () => {
   return (
     <div>
       <h2>Upcoming features</h2>
@@ -15,4 +15,4 @@ const ShadowTransactions = () => {
   );
 };
 
-export default ShadowTransactions;
+export default Roadmap;
