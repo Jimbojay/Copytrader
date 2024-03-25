@@ -8,15 +8,18 @@ export const ShadowTransactions = createSlice({
 		addTransaction: (state, action) => {
 			state.push(action.payload);
 		},
-		updateTransaction: (state, action) => {
+		updateTokensTransactions: (state, action) => {
 			const index = state.findIndex(tx => tx.hash === action.payload.hash);
 			if (index !== -1) {
 			state[index] = { ...state[index], ...action.payload.updates };
 			}
 		},
+		clearShadowTransactions: state => {
+			return []; // Simply return an empty array to clear the transactions
+		},
 	},
 });
 
-export const { addTransaction, updateTransaction } = ShadowTransactions.actions;
+export const { addTransaction, updateTokensTransactions, clearShadowTransactions } = ShadowTransactions.actions;
 
 export default ShadowTransactions.reducer;

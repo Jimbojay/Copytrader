@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useDispatch } from 'react-redux'
 import { HashRouter, Routes, Route } from 'react-router-dom'
 import { Container } from 'react-bootstrap'
+import { saveState, loadState } from '../localStorage'
 
 // Components
 import Navigation from './Navigation';
@@ -10,7 +11,8 @@ import Tabs from './Tabs';
 // import Deposit from './Deposit';
 // import Withdraw from './Withdraw';
 // import Charts from './Charts';
-import ShadowTransactions from './ShadowTransactions';
+import ShadowTransactions from './TEST_ShadowTransactions';
+// import ShadowTransactions from './ShadowTransactions';
 import ShadowAddressManager from './ShadowAddresses';
 import PandL from './PandL';
 import Roadmap from './Roadmap';
@@ -27,7 +29,9 @@ import {
 } from '../store/interactions'
 
 function App() {
-
+  // saveState("Hello world!")
+  console.log("teststring")
+  console.log(loadState())
   const dispatch = useDispatch()
 
   const loadBlockchainData = async () => {

@@ -352,7 +352,22 @@ export const swapTokens = async (provider, tokenFrom, tokenTo, decimalsTokenFrom
 
 			// } else {
 
-		transaction = await UNISWAP_ROUTER_CONTRACT.connect(signer).swapExactTokensForTokens(amountIn, amountOutMinHex, path, signerAddress, deadline);
+		try {
+			transaction = await UNISWAP_ROUTER_CONTRACT.connect(signer).swapExactTokensForTokens(amountIn, amountOutMinHex, path, signerAddress, deadline);
+		} catch (error) {
+			console.error(error);
+
+			// Extracting the error message from the nested error object
+			const errorMessage = error.reason || error.message || "An unknown error occurred during the transaction.";
+			let userMessage = "An error occurred during the transaction.";
+	
+			if (errorMessage.includes('UNPREDICTABLE_GAS_LIMIT') || errorMessage.includes('TRANSFER_FAILED') || errorMessage.includes('INSUFFICIENT_OUTPUT_AMOUNT')) {
+				userMessage = "The transaction couldn't be executed. This may be due to slippage constraints or price movement. Try adjusting your slippage tolerance or the amount.";
+			}
+	
+			alert(userMessage);
+		}
+		
 		const reciept = await transaction.wait()
 		console.log("reciept1:", reciept)
 
