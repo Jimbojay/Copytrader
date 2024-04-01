@@ -1,0 +1,30 @@
+/* custom.css */
+/*body {
+    background-color: black !important;
+    color: green !important;*/ /* Assuming you want white text */
+/*}*/
+
+/* custom.css */
+/*.white-navbar-brand {
+    color: white !important;
+}*/
+
+.blue-glow {
+    box-shadow: 
+        0 0 20px rgba(0, 123, 255, 0.8), /* Inner blue glow */
+        0 0 40px 5px rgba(255, 255, 255, 0.8); /* Outer white glow */
+}
+
+
+/*.navbar .navbar-brand, .navbar .navbar-nav .nav-link  {
+  color: white;
+}*/
+
+.disabled-input {
+  background-color: #f8f9fa; /* Grey background color */
+  color: #6c757d; /* Grey text color */
+  cursor: not-allowed; /* Change cursor style */
+  pointer-events: none; /* Disable pointer events */
+}
+
+/*Use bootstrap for styling 5.3 dark themes*/
