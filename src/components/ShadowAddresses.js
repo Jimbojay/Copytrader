@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux'; 
+import { useDispatch } from 'react-redux'; 
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
-import {addWallet, loadWallets} from '../localStorage';
+import {addWallet, loadWallets, removeWallet} from '../localStorage';
 
 import { addShadowAddress, removeShadowAddress } from '../store/reducers/shadowAddresses'; // Import the actions
 
@@ -34,6 +34,7 @@ const ShadowAddressManager = () => {
 
   const handleRemoveShadowAddress = () => {
     if (selectedAlias) {
+      removeWallet(selectedAlias)
       dispatch(removeShadowAddress(selectedAlias));
       setSelectedAlias('');
     }
