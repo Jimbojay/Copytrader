@@ -25,6 +25,8 @@ function App() {
     // Initiate provider
     const provider = await loadProvider(dispatch)
 
+    console.log("testigggggggggg")
+
     const chainId = await loadNetwork(provider, dispatch)
 
     // Reload page when network changes

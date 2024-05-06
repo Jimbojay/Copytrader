@@ -1,7 +1,14 @@
 {
+  "1": {
+    "networkName": "Ethereum Mainnet",
+    "additionalDetails": "..."
+  },
+  "137": {
+    "networkName": "Polygon",
+    "additionalDetails": "..."
+  },
   "31337": {
-    "token": {
-      "address": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
-    }
+    "networkName": "Localhost",
+    "additionalDetails": "..."
   }
 }

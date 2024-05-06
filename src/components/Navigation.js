@@ -9,6 +9,7 @@ import logo from '../media/DappAstra_logo_transparent.png';
 
 import { loadAccount
 // , loadBalances 
+,loadNetwork
 } from '../store/interactions'
 
 import config from '../config.json'
@@ -27,10 +28,21 @@ const Navigation = () => {
   }
 
   const networkHandler = async (e) => {
-    await window.ethereum.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: e.target.value }],
-    })
+    console.log(e.target.value)
+    try {
+      await window.ethereum.request({
+        method: 'wallet_switchEthereumChain',
+        params: [{ chainId: e.target.value }],
+      });
+      // Optionally dispatch action to update chainId in your Redux store:
+      // dispatch(loadNetwork(provider, e.target.value));
+    } catch (error) {
+      if (error.code === 4902) {
+        console.error('The requested network is not available.');
+      } else {
+        console.error('Failed to switch network:', error);
+      }
+    }
   }
 
   return (
@@ -47,16 +59,19 @@ const Navigation = () => {
       <Navbar.Collapse id="nav" className="justify-content-end">
 
         <div className="d-flex justify-content-end mt-3">
-
+          {console.log('test chainid: ', chainId)}
+          {console.log("Current hex chainId:", `0x${parseInt(chainId, 10).toString(16)}`)}
+          
           <Form.Select
             aria-label="Network Selector"
-            value={config[chainId] ? `0x${chainId.toString(16)}` : `0`}
+            value={config[chainId] ? `0x${parseInt(chainId, 10).toString(16)}` : "0"}
             onChange={networkHandler}
             style={{ maxWidth: '200px', marginRight: '20px' }}
           >
             <option value="0" disabled>Select Network</option>
-            <option value="0x7A69">Localhost</option>
-            <option value="0x5">Goerli</option>
+            <option value="0x1">ETH Mainnet</option>
+            <option value="0x7a69">Localhost</option>
+            {/* <option value="0x89">Polygon</option> */}
           </Form.Select>
 
           {account ? (

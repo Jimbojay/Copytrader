@@ -24,11 +24,13 @@ const ShadowAddressManager = () => {
   const [selectedAlias, setSelectedAlias] = useState('');
 
   const handleAddShadowAddress = () => {
-    if (newAlias && newWalletAddress) {
+    if (newAlias && newWalletAddress && isValidEthereumAddress(newWalletAddress)) {
       addWallet({ alias: newAlias, walletAddress: newWalletAddress })
       dispatch(addShadowAddress({ alias: newAlias, walletAddress: newWalletAddress }));
       setNewAlias('');
       setNewWalletAddress('');
+    } else {
+      alert('Please enter a valid Ethereum wallet address.');
     }
   };
 
@@ -38,6 +40,10 @@ const ShadowAddressManager = () => {
       dispatch(removeShadowAddress(selectedAlias));
       setSelectedAlias('');
     }
+  };
+
+  const isValidEthereumAddress = (address) => {
+    return address.match(/^0x[a-fA-F0-9]{40}$/) !== null;
   };
 
   return (
@@ -95,7 +101,7 @@ const ShadowAddressManager = () => {
                   <Form.Label>Alias</Form.Label>
                   <Form.Control
                     type="text"
-                    placeholder="Enter alias"
+                    placeholder="Enter arbitrary alias"
                     value={newAlias}
                     onChange={(e) => setNewAlias(e.target.value)}
                   />

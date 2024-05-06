@@ -513,22 +513,27 @@ const ShadowTransactions = () => {
 
   return (
       <>
-      {!loadingStatus.transactions ? (
-        <div style={{ height: '50vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        {wallets.map(wallet => (
-          <div key={wallet.walletAddress} style={{ margin: '10px 0' }}>
-            <Alert variant="info" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 'fit-content', padding: '20px', maxWidth: '400px' }}>
-              <span>{wallet.alias || wallet.walletAddress}</span>
-              {loadingStatusWallets[wallet.alias] === 'loading' ? (
-                <Spinner animation="border" />
-              ) : (
-                  <CheckCircleFill style={{ color: 'green', fontSize: '1.5rem' }} />
-              )}
-            </Alert>
-          </div>
-        ))}
-        </div>
-      ) : (     
+    {wallets.length === 0 ? (
+        <Alert variant="warning" className="text-center">
+            Please register at least one shadow address on the next page to start fetching transactions.
+        </Alert>
+    ) : (
+        !loadingStatus.transactions ? (
+            <div style={{ height: '50vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+            {wallets.map(wallet => (
+                <div key={wallet.walletAddress} style={{ margin: '10px 0' }}>
+                    <Alert variant="info" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: 'fit-content', padding: '20px', maxWidth: '400px' }}>
+                        <span>{wallet.alias || wallet.walletAddress}</span>
+                        {loadingStatusWallets[wallet.alias] === 'loading' ? (
+                            <Spinner animation="border" />
+                        ) : (
+                            <CheckCircleFill style={{ color: 'green', fontSize: '1.5rem' }} />
+                        )}
+                    </Alert>
+                </div>
+            ))}
+            </div>
+        ) : (       
         <div style={{ overflowX: 'auto' }}>
         {/* Render multi-select dropdowns for filtering */}
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', gap: '20px' }}>
@@ -670,7 +675,8 @@ const ShadowTransactions = () => {
           </tbody>
         </Table>
         </div>
-      )}
+      )
+    )}
     </>
   );
   
